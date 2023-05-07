@@ -1,0 +1,29 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+{% load thumbnail %}
+
+{% block title %}People{% endblock %}
+{% block body %}
+    {% with WIDGET_ERROR_CLASS='is-invalid' %}
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>People</h5>
+            </div>
+        
+            <div class="modal-body" style="height: 80vh; overflow-y: auto;">
+                {% for user in users %}
+                    <div class="user">
+                        <a href="{{ user.get_absolute_url }}"><img src="{% thumbnail user.profile.image 180x180 %}"></a>
+                        <div class="info">
+                            <a href="#" hx-get="{{ user.get_absolute_url }}" class="title" hx-target="#dialog">{{ user.get_full_name }}</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+            </div>
+        </div>
+    {% endwith %}
+{% endblock %}

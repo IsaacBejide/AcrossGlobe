@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %} Blog Categories {% endblock %}
+{% block add_blogs_active %} active {% endblock add_blogs_active %}
+
+{% block css %}
+{% endblock %}
+{% block body %}
+
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            Add Category
+        </div>
+
+        <div class="card-body">
+            <form action="/en/add_category/" method="POST"> {% csrf_token %}
+                <div class="container mt-4">
+                    {{ form.as_p }}
+                    <button class="btn btn-primary">Add Category</button>
+                </div>
+            </form>
+            <br>
+            <table class="table table-hover">
+                <thead>
+                    <tr class="text-left">
+                        <th>S/No</th>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                {% for category in categories %}
+                    <tbody>
+                        <tr>
+                            <td> {{ forloop.counter }} </td>
+                            <td> {{ form.type }} </td>
+                            <td> {{ category.category_title }} </td>
+                            <td><a class="btn btn-info" href="#" role="button">Edit</a></td>
+                            {% comment %} <td><a class="btn btn-danger" href="#" role="button">Delete</a></td> {% endcomment %}
+                        </tr>
+                    </tbody>
+                {% endfor%}
+            </table>
+        </div>  
+    </div>
+</div>
+
+{% endblock %}
+{% block js %}
+<script>
+    {% if alert %}
+    alert('Category added successfully.');
+    document.location = '/';
+    {% endif %}
+</script>
+{% endblock %}

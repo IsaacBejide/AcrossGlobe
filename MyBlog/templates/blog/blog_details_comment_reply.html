@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %} Reply comment {% endblock %}
+{% block add_blogs_active %} active {% endblock add_blogs_active %}
+
+{% block css %}
+{% endblock %}
+{% block body %}
+
+ {% comment %} <h3 class="modal-title">Reply Comment</h3>
+   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+    </button>
+</div>  {% endcomment %}
+
+<div class="card">
+    <div class="card-header">
+        <h5>Comment: <a href="/blog/{{post.slug}}/">{{post.title}} - {{category.category_title}}</a></h5>
+    </div>
+    <div class="card-body">
+        {{comments.content|safe}}
+    </div>  
+</div>
+
+<form action="/en/reply_comment/{{comments.id}}/" enctype="multipart/form-data" method="POST"> 
+    {% csrf_token %}
+        <div class="card">
+            <div class="card-header">
+                <h5>Reply Comment</h5>  <!--<a href="/blog/{{post.slug}}/">{{post.title}} - {{category.category_title}}</a></h5>-->
+            </div>
+            <div class="card-body">
+                {{ form.media }}
+                {{ form.as_p }}
+                {% comment %} {{ formset.as_p }} {% endcomment %}
+                <button type="submit" class="submit-btn btn btn-primary">Submit</button>
+            </div>  
+        </div>
+    {% comment %} </div>
+    <div class="modal-footer"> {% endcomment %}
+        
+    {% comment %} </div> {% endcomment %}
+</form>
+<br><br>
+
+{% endblock %}
+
+{% block js %}
+{% comment %} <script type="text/javascript" src="../ckeditor/ckeditor-init.js"></script>
+<script type="text/javascript" src="../ckeditor/ckeditor/ckeditor.js"></script> {% endcomment %}
+<script>
+    {% if alert %}
+    alert('Comment added successfully.');
+    document.location = '/blog/{{post.slug}}';
+    {% endif %}
+</script>
+{% endblock %}
+
+
+
+
+
+{% comment %} <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <form id="item_update_form" method='post' class="form" role="form" action=''>
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h4 class="modal-title" id="myModalLabel">Item {{ item.id }}</h4>
+            </div>
+            <div class="modal-body">
+                  {% csrf_token %}
+                  {{ form.non_field_errors }}
+                  <div class="form-group">
+                  {% for field in form %}
+                      <div class="form-group">
+                          {% if field.errors %}
+                              <ul class="form-errors">
+                              {% for error in field.errors %}
+                                  <li><span class="fa fa-exclamation-triangle"></span> <strong>{{ error|escape }}</strong></li>
+                              {% endfor %}
+                              </ul>
+                          {% endif %}
+                          {{ field.label_tag }} {{ field }} 
+                          {% if field.help_text %}<div class="form-helptext">{{ field.help_text }}</div>{% endif %}
+                      </div>
+                  {% endfor %}
+            </div>
+            <div class="modal-footer">
+              <input type="button" class="btn btn-default" data-dismiss="modal" value="annulla" />
+              <input type="submit" class="btn btn-primary" value="save" style="margin-bottom: 5px;" />
+            </div>
+      </form>
+      <script>
+          jQuery('.modal-content .calendar').datepicker({ dateFormat: "yy-mm-dd" });
+
+              var form_options = {
+                  target: '#modal',
+                  success: function() {  }
+              }
+              $('#item_update_form').ajaxForm(form_options);
+      </script>
+  </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog --> {% endcomment %}

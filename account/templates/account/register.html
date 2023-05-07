@@ -1,0 +1,25 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+
+{% block body %} 
+  {% with WIDGET_ERROR_CLASS='is-invalid' %}
+    <form action="{% url 'register' %}" method="post">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Create an account</h2>
+        </div>
+        <div class="modal-body">
+          <p>Please, sign up using this form:</p>
+          {% crispy user_form %}
+        </div>
+        <div class="modal-footer">
+          {% comment %} <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+          <button type="button" class="btn btn-primary">Create my account</button> {% endcomment %}
+          <input type="submit" value="Create my account">
+        </div>
+      </div>
+    </form>
+  {% endwith %}
+{% endblock %}

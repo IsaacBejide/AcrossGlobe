@@ -1,0 +1,183 @@
+{% load i18n %}
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> {% endcomment %}
+    <!-- AcrossGlobe CSS -->
+    <link href="/static/css/AcrossGlobe.css" rel="stylesheet" type="text/css">
+    <link href="/feed" rel="alternate" type="application/rss+xml" title="AcrossGlobe">
+    {% comment %} <meta name="google-site-verification" content="KUABan1rWBhK3Jb2LePxHAv00FEbbM1wQMAAgsN-EyA"> {% endcomment %}
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> {% endcomment %}
+
+    <!-- Font Awesome 
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">-->
+
+
+    <title> {% block title %} {% endblock %} </title> 
+    <link rel="icon" type="media/png" href="/media/logo/acrossglobelogo.png"/>
+    <style> 
+    {% block css %} 
+    
+    {% endblock %} 
+  </style>
+  </head>
+  <body> 
+    {% comment %} {% include 'blog/header.html' %} {% endcomment %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+      <div class="container">
+        {% comment %} <a class="navbar-brand" href="/">
+          <img src="/media/logo/acrossglobelogo.png" alt="..." width="70px" height="50px">
+        </a> {% endcomment %}
+        <div class="navbar-header">
+          <b><a class="navbar-brand" href="/">Across Globe</a></b>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+  
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <div class="container mx-3 navbar-right">
+            <ul class="nav navbar-nav me-auto mb-2 mb-lg-0">
+                {% comment %} <li class="nav-item">
+                  <a class="nav-link {% block homeactive %} {% endblock homeactive %}" aria-current="page" href="/">Home</a>
+                </li> {% endcomment %}
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                      <a class="nav-link active" href="/">{% trans "Welcome" %} {{request.user}}</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link {% block profileactive %} {% endblock profileactive %}" href="#" hx-get="/profile/{{request.user.id }}" hx-target="#dialog">{% trans "Profile" %}</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="{% url "logout" %}">{% trans "Logout" %}</a>
+                    </li>
+                  {% else %}
+                    <li class="nav-item">
+                      {% comment %} <a class="nav-link {% block registeractive %} {% endblock registeractive %}" href="{% url "register" %}">{% trans "Register" %}</a> {% endcomment %}
+                      <a href="#" class="nav-link {% block registeractive %} {% endblock registeractive %}" type="link" hx-get="{% url "register" %}" hx-target="#dialog">{% trans "Register" %}</a>
+                    </li>
+                    <li class="nav-item">
+                      {% comment %} <a class="nav-link {% block loginactive %} {% endblock loginactive %}" href="{% url "login" %}">{% trans "Login" %}</a> {% endcomment %}
+                      <a href="#" class="nav-link {% block loginactive %} {% endblock loginactive %}" type="link" hx-get="{% url "login" %}" hx-target="#dialog">{% trans "Login" %}</a>
+                    </li>
+                {% endif %}
+    
+                <li {% if section == "people" %} class="selected"{% endif %}  class="nav-item">
+                  <a class="nav-link" href="#" hx-get="{% url "MyBlog:site_statistics" %}" hx-target="#dialog">{% trans "Site Statistics" %}</a>
+                </li>
+
+                <li {% if section == "people" %}class="selected"{% endif %}>
+                  <a class="nav-link active" href="#" hx-get="{% url "user_list" %}" hx-target="#dialog">{% trans "People" %}</a>
+                </li>
+
+            </ul>
+          </div>
+    
+          {% include "blog/partial_language_selector.html" %}
+        
+          <form class="d-flex" method="POST" action="/search/"> 
+            {% csrf_token %}
+            <input class="form-control me-2" type="search" placeholder="Search" name="searched" id="searched" aria-label="Search">
+            <button href="/search/" class="btn btn-outline-info" type="submit">{% trans "Search" %}</button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      {% block body %}
+
+      {% endblock %}
+    </div>
+
+    <!--  Please leave this lines below-->
+    {% block domready %}
+
+    {% endblock %}
+
+    <!-- MODAL POPUP PLACEHOLDER-->
+    <div id="modal" class="modal fade" tabindex="-1">
+      <div id="dialog" class="modal-dialog modal-lg" style="overflow-y: initial !important">
+        <!-- inject HTML here -->
+      </div>
+    </div>
+
+   
+    <footer class="bg-primary text-center text-md-start">{% comment %} fixed-bottom {% endcomment %}
+      <div class="col-md-6 p-3">
+        <form class="d-flex" method="POST" action="/search/"> 
+          {% csrf_token %}
+          <input class="form-control me-2" type="search" placeholder="Search" name="searched" id="searched2" aria-label="Search">
+          <button href="/search/" class="btn btn-outline-info" type="submit">{% trans "Search" %}</button>
+        </form>
+        © Copyright 2023 Powered by <a class="text-light" href="/">White Oceans.</a>  All rights reserved.<br>
+        <b>Disclaimer:</b> You are responsible for your posts.
+      </div>
+    </footer>
+
+
+    <!--  JAVA Scripts  -->
+    <script src="https://unpkg.com/htmx.org@1.7.0"></script> 
+    {% comment %} <script src="https://cdn.jsdeliver.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>  {% endcomment %}
+    <script src="{% static 'bootstrap-5.1.3-dist/js/bootstrap.bundle.min.js' %}"></script> 
+    <script src="{% static 'dialog.js' %}"></script> 
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script> 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
+
+     <!-- highlight js -->
+     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/monokai-sublime.min.css">
+     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+     <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
+
+    {% comment %} <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+    <script src="{% static 'js/jquery.bootstrap.modal.forms.min.js' %}"></script> {% endcomment %}
+
+    {% comment %} <!-- Bootstrap 5 -->
+    <script src="{% static 'js/bootstrap5.modal.forms.js' %}"></script>
+    <!-- You can alternatively load the minified version -->
+    <script src="{% static 'js/bootstrap5.modal.forms.min.js' %}"></script> {% endcomment %}
+
+    <script>
+        var csrftoken = Cookies.get('csrftoken');
+        function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+          }
+        });
+
+    </script> 
+  
+    {% block js %} 
+    {% endblock %}
+  </body>
+</html>

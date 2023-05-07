@@ -1,0 +1,23 @@
+{% load i18n %}
+
+<div class="container mt-2 mb-2">
+    <div class="card">
+      <div class="card-header">
+        <b>{% trans "Across Globe Reporting" %}</b>
+        {% comment %} <center>{% trans "To Create a new topic, click on any category below" %}</center> {% endcomment %}
+      </div>
+      <div class="card-body">
+        {% for type in types %}
+          <b>{{ type.type }}:</b>
+              <tr><td>
+                {% for cat in categories %}
+                  {% if type.id == cat.type_id %}
+                    <a href="/blog/{{cat.slug}}/{{cat.id}}">{{cat.category_title}}{% if not forloop.last %}, {% endif %} </a>
+                  {% endif %}
+                {% endfor %}
+              </td></tr>
+             {% if not forloop.last %}<hr>{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+</div>

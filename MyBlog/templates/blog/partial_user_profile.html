@@ -1,0 +1,120 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block body %}    
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>{{user.username}}</h5>
+            </div>
+
+            <div class="modal-body" style="height: 80vh; overflow-y: auto;">
+                <form method="post">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <img src="{{user.profile.image.url}}" alt="" width="290px" height="250px">
+                                </div>
+                                <div class="col-sm-7">
+                                    <tr>
+                                        <td><b>Username:</b> {{user.username}}</td><br>
+                                        <td><b>Full Name:</b> {{user.get_full_name}}</td><br>
+                                        <td><b>Email:</b> {{user.email}}</td><br>
+                                        <td><b>Bio:</b> {{user.profile.bio}}</td><br>
+                                        <td>
+                                            {% with total_followers=user.followers.count %}
+                                                <span class="count">
+                                                    <span class="total">{{ total_followers }}</span>
+                                                        follower{{ total_followers|pluralize }}
+                                                    </span>
+                                                    <a href="#" data-id="{{ user.id }}" data-action="{% if request.user in user.followers.all %}un{% endif %}follow" class="follow button">
+                                                        {% if request.user not in user.followers.all %}
+                                                            Follow
+                                                        {% else %}
+                                                            Unfollow
+                                                        {% endif %}
+                                                    </a>
+                                            {% endwith %}
+                                        </td>
+                                    </tr>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mt-2">
+                            {% if user.profile.linkedin %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Linkedin:</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{user.profile.linkedin}}</p>
+                                </div>
+                            </div>  
+                            {% endif %}
+                            {% if user.profile.instagram %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Instagram:</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{user.profile.instagram}}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if user.profile.facebook %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Facebook:</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>{{user.profile.facebook}}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+                <hr>
+                <h4>{{user.username}} Post Lists</h4>
+                {% for p in post %}
+                <div class="col-sm-12 row">
+                    <div class="col-sm-8"><a href="/blog/{{p.category.slug}}/{{p.category.id}}">{{ p.category.category_title }}</a> <b>/</b> <a href="blog/{{p.slug}}">{{p.title}}</a></div>
+                    <div class="col-sm-4">{{ p.dateTime }}</div>
+                </div>
+                {% endfor%}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+            </div>
+        </div>       
+{% endblock %}
+
+{% block domready %}
+<script>
+    $('a.follow').click(function(e){
+        e.preventDefault();
+        $.post('{% url "user_follow" %}',
+        {
+            id: $(this).data('id'),
+            action: $(this).data('action')
+        },
+        function(data){
+            if (data['status'] == 'ok') {
+                var previous_action = $('a.follow').data('action');
+                // toggle data-action
+                $('a.follow').data('action', previous_action == 'follow' ? 'unfollow' : 'follow');
+                // toggle link text
+                $('a.follow').text(previous_action == 'follow' ? 'Unfollow' : 'Follow');
+                // update total followers
+                var previous_followers = parseInt(
+                $('span.count .total').text());
+                $('span.count .total').text(previous_action == 'follow' ? previous_followers + 1 : previous_followers - 1);
+            }
+        });
+    });
+</script>
+{% endblock %}

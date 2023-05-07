@@ -1,0 +1,34 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+
+{% block css %}
+{% endblock %}
+{% block body %}
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h5><a href="#">Edit {{ user }} Profile</a></h5>
+    </div>
+    <form action="en/edit_profile/" enctype="multipart/form-data" method="POST"> 
+        {% csrf_token %}
+        <div class="modal-body">
+                {{ form.as_p }}
+            {% comment %} <button type="submit" class="btn btn-primary">Update</button> {% endcomment %}
+        </div>  
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+            <button type="submit" class="submit-btn btn btn-primary">Update</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+{% block js %}
+<script>
+    {% if alert %}
+    alert('Your Profile has been updated successfully.');
+    document.location = '/profile/';
+    {% endif %}
+</script>
+{% endblock %}

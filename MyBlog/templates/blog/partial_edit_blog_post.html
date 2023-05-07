@@ -1,0 +1,27 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+{% block css %}
+{% endblock %}
+
+{% block body %}
+    {% with WIDGET_ERROR_CLASS='is-invalid' %}
+        <form enctype="multipart/form-data" method="POST"> 
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Update Topic - {{category.category_title}}</h5>
+                </div>
+
+                <div class="modal-body">
+                    {% crispy form %}
+                    {% crispy formset %}
+                </div> 
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+                    <button type="submit" class="btn btn-primary">Update Blog</button>
+                </div> 
+            </div>
+        </form>
+    {% endwith %}
+{% endblock %}

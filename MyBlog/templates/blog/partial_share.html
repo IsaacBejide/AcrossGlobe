@@ -1,0 +1,31 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+{% block css %}
+{% endblock %}
+
+{% block body %}
+    {% with WIDGET_ERROR_CLASS='is-invalid' %}
+        <form action="/en/{{post.id}}/share/" method="post">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Share "{{ post.title }}" by e-mail</h5>
+                </div>
+
+                <div class="modal-body">
+                    {% if sent %}
+                        <h>E-mail successfully sent</h1>
+                        <p>"{{ post.title }}" was successfully sent to {{ form.cleaned_data.to }}.</p>
+                    {% else %}
+                        {% csrf_token %}
+                        {% crispy form %}
+                    {% endif %}
+                </div>  
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+                    <button type="submit" class="submit-btn btn btn-primary">Send e-mail</button>
+                </div>
+            </div>
+        </form>
+    {% endwith %}
+{% endblock %}

@@ -1,0 +1,52 @@
+{% load widget_tweaks %}
+{% load i18n %}
+
+<div class="container mt-2">
+    <div class="card">
+      <div class="card-body">
+        <div class="container">
+              <div class="row">
+                {% for post in posts %}
+                  <div class="col-sm-4 my-3">
+                      <div class="card shadow" style="width: 20rem; height: 18rem;">
+                        <a href="blog/{{post.slug}}"><img src="/media/{{post.image}}" class="card-img-top" alt="..." height="120px"></a>
+                          <div class="card-body">
+                            <h6 class="card-title"><a href="/blog/{{post.slug}}">{{post.title}}</a> 
+                              <br>
+                                <div>
+                                  <small>by <a href="#" hx-get="/user_profile/{{post.author.id}}/" hx-target="#dialog">{{post.author}} 
+                                  {% if user.is_superuser %}
+                                      <a href="delete_blog_post/{{post.slug}}/">Approve Blog</a>
+                                  {% endif %}</a></small>
+                                <div>
+                            </h6>
+                            {% comment %} <p class="card-text">{{post.content| safe| truncatechars:120}}</p> {% endcomment %}
+                          </div>
+                          <div class="card-footer">
+                            <a> 
+                              {% with total_likes=post.users_like.count users_like=post.users_like.all %}
+                                <span class="total">{{ total_likes }}</span> like{{ total_likes|pluralize }}
+                              {% endwith %} <span class="float-right"> ({{ post.viewers.count }} Views) </span></a>
+                          </div>
+                        </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div> 
+      </div>
+      <div class="card-footer">
+        {% if posts.has_other_pages %}
+          <nav aria-label="Page navigation conatiner"></nav>
+            <ul class="pagination justify-content-center">
+              {% if posts.has_previous %}
+                <li><a href="?page={{ posts.previous_page_number }}" class="page-link">&laquo; PREV </a></li>
+              {% endif %}
+              {% if posts.has_next %}
+                <li><a href="?page={{ posts.next_page_number }}" class="page-link"> NEXT &raquo;</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div> 

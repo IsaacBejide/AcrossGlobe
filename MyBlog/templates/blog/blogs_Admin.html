@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %} Blogs {% endblock %}
+{% block homeactive %} active {% endblock homeactive %}
+
+{% block css %}
+  table { border-collapse: collapse; }
+  tr { display: block; float: left; }
+  th, td { display: block; border: 1px; }
+{% endblock %}
+{% block body %}
+
+<div class="container mt-3 mb-1">
+  <div class="card">
+    <div class="card-header">
+          Picture and Video Reporting
+    </div>
+    <div class="card-body">
+      {% for cat in categories %}
+        <tr><th><a href="/admins/{{cat.id}}">{{cat.category_title}}, </a></th></tr>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="container mt-2">
+<div id='keywords' class="card">
+  <div class="card-header">
+       Latest News
+  </div>
+  <div class="card-body">
+    <div class="container">
+          <div class="row">
+            {% for post in posts %}
+              <div class="col-sm-4 my-3">
+                  <div class="card shadow" style="width: 20rem; height: 20rem;">
+                    <a href="blog/{{post.slug}}"><img src="/media/{{post.image}}" class="card-img-top" alt="..." height="120px"></a>
+                      <div class="card-body">
+                        <h6 class="card-title"><a href="blog/{{post.slug}}">{{post.title}}</a> 
+                          <br>
+                            <div>
+                              <small>by <a href="/user_profile/{{post.author.id}}/">{{post.author}} 
+                              {% if user.is_superuser %}
+                                  <a href="delete_blog_post/{{post.slug}}/">Approve Blog</a>
+                              {% endif %}</a></small>
+                            <div>
+                        </h6>
+                        <p class="card-text">{{post.content| truncatechars:120}}</p>
+                      </div>
+                    </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+  </div>
+</div>
+</div>
+
+
+
+<br>
+       
+{% comment %} {% if posts.has_other_pages %}
+  <nav aria-label="Page navigation conatiner"></nav>
+  <ul class="pagination justify-content-center">
+    {% if posts.has_previous %}
+      <li><a href="?page={{ posts.previous_page_number }}" class="page-link">&laquo; PREV </a></li>
+    {% endif %}
+    {% if posts.has_next %}
+      <li><a href="?page={{ posts.next_page_number }}" class="page-link"> NEXT &raquo;</a></li>
+   {% endif %}
+  </ul>
+  </nav>
+</div>
+{% endif %} {% endcomment %}
+
+{% comment %} <nav aria-label="Page navigation conatiner"></nav>
+  <ul class="pagination justify-content-center">
+    {% if posts.has_previous %}
+        <a href="?page={{ 1 }}">◀️◀️</a>
+        <a href="?page={{ posts.previous_page_number }}">◀️</a>
+    {% endif%}
+
+    <a>{{posts.number}} of {{posts.paginator.num_pages}}</a>
+
+    {% if posts.has_next %}
+        <a href="?page={{ posts.next_page_number }}">▶️</a>
+        <a href="?page={{ posts.paginator.num_pages }}">▶️▶️</a>
+    {% endif%}
+  </ul>
+</nav> {% endcomment %}
+    {% comment %} <hr>
+
+    {% for page_number in page_obj.paginator.page_range %}
+        <a
+            href="{% url 'terms-by-page' page_number %}"
+            class="{% if page_number == page_obj.number %}current{% endif %}"
+        >
+            {{page_number}}
+        </a>
+    {% endfor %} {% endcomment %}
+
+
+
+{% endblock %}
+
+
+<!--https://realpython.com/django-pagination/-->
+
+{% block js %}
+<style>
+    #loading {
+        transition: opacity 1s ease-out;
+        opacity: 1;
+    }
+</style>
+
+<div id="loading">Loading...</div>
+
+<script>
+    async function getData(url, page, paginateBy) {
+        const urlWithParams = url + "?" + new URLSearchParams({
+            page: page,
+            per_page: paginateBy
+        })
+        const response = await fetch(urlWithParams);
+        return response.json();
+    }
+
+    class ScrollMorePaginator {
+        constructor(perPage) {
+            this.perPage = perPage
+            this.pageIndex = 1
+            this.lastPage = false
+            this.container = document.querySelector("#keywords")
+            this.elements = document.querySelectorAll("pre")
+            this.loader = document.querySelector("#loading")
+            this.options = {
+                root: null,
+                rootMargin: "0px",
+                threshold: 0.25
+            }
+            this.loadMore()
+            this.watchIntersection()
+        }
+
+        onIntersect() {
+            if (!this.lastPage) {
+                this.pageIndex++
+                this.loadMore()
+            }
+        }
+
+        addElement(keyword) {
+            const pre = document.createElement("pre")
+            pre.append(keyword)
+            this.container.append(pre)
+        }
+
+        watchIntersection() {
+            document.addEventListener("DOMContentLoaded", () => {
+                const observer = new IntersectionObserver(this.onIntersect.bind(this),
+                    this.options);
+                observer.observe(this.loader);
+            })
+        }
+
+        loadMore() {
+            getData(this.pageIndex, this.perPage)
+                .then(response => {
+                    response.data.forEach((el) => {
+                        this.addElement(el.name)
+                    });
+                    this.loader.style.opacity = !response.page.has_next ? "0" : "1"
+                    this.lastPage = !response.page.has_next
+                });
+        }
+    }
+
+    new ScrollMorePaginator(6);
+</script>
+{% endblock %}

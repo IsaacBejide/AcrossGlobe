@@ -1,0 +1,115 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block body %}
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5><a href="#">{{ user }} Profile</a></h5>
+        </div>
+        <div class="modal-body" style="height: 80vh; overflow-y: auto;">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="profile-img">
+                        {% if user.profile.image %}
+                        <img src="{{user.profile.image.url}}" alt="" width="310px" height="270px">
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Username:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{user}}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Full Name:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{user.get_full_name}}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Email:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{user.email}}</p>
+                            </div>
+                        </div>
+                        {% if user.profile.phone_no %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Phone Number:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{user.profile.phone_no}}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if user.profile.bio %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Bio:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{user.profile.bio}}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if user.profile.linkedin %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Linkedin:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p><a href="{{user.profile.linkedin}}">{{user.profile.linkedin}}</a></p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if user.profile.instagram %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Instagram:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p><a href="{{user.profile.instagram}}">{{user.profile.instagram}}</a></p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if user.profile.facebook %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Facebook:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p><a href="{{user.profile.facebook}}">{{user.profile.facebook}}</a></p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    
+                    <a href="#" hx-get="/edit_profile/" class="btn btn-primary" hx-target="#dialog">Edit Profile</a>
+                </div>
+            </div>
+            <hr>
+            <h6>My Post Lists</h6>
+            {% for p in post %}
+            <div class="col-sm-12 row">
+                <div class="col-sm-8"><a href="/blog/{{p.category.slug}}/{{p.category.id}}">{{ p.category.category_title }}</a> <b>/</b> <a href="blog/{{p.slug}}">{{p.title}}</a></div>
+                <div class="col-sm-4">{{ p.dateTime }}</div>
+            </div>
+            {% endfor%}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+        </div>
+    </div>
+{% endblock %}

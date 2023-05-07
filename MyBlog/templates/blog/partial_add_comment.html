@@ -1,0 +1,35 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+
+{% block css %}
+{% endblock %}
+
+{% block body %}
+
+{% with WIDGET_ERROR_CLASS='is-invalid' %}
+  <form action="/en/add_comment/{{post.slug}}/" enctype="multipart/form-data" class="modal-content" method="POST">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5><a href="/blog/{{post.slug}}/">{{post.title}} - {{category.category_title}}</a></h5>
+        </div>
+        <div class="modal-body">
+          {% csrf_token %}
+          {{ form.media }} 
+          {% crispy form %}
+          {% crispy formset %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+          <button type="submit" class="submit-btn btn btn-primary">Submit</button>
+        </div>
+      </div>
+  </form>
+  {% endwith %}
+
+{% endblock %}
+
+
+{% block js %}
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %} {% trans "Across the Globe" %} {% endblock %}
+{% block homeactive %} active {% endblock homeactive %}
+
+{% block css %}
+<style>
+  table { border-collapse: collapse; }
+    tr { display: block; float: left; }
+    th, td { display: block; border: 1px; }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+{% include "blog/categories.html" %}
+
+<center>
+  <div class=vertipics>
+    <a href="/hopto/home/17156" rel=sponsored><img src="https://www.nairaland.com/vertipics/6ez6otwqpwazgmvtld26kw3q2roijgou.png"></a>
+    <a href="/hopto/home/17074" rel=sponsored><img src="https://www.nairaland.com/vertipics/iqax0ww60vcft2zqxgm9ocus2dq86ae0.jpg"></a>
+    <a href="/hopto/home/15920" rel=sponsored><img src="https://www.nairaland.com/vertipics/1cqm2xehafkcin1q0te5z27n9tz69oy6.jpg"></a>
+  </div>
+</center>
+
+{% include "blog/blog_list_ajax.html" %}
+
+<center>
+  <div class=vertipics>
+    <a href="/hopto/home/17156" rel=sponsored><img src="https://www.nairaland.com/vertipics/6ez6otwqpwazgmvtld26kw3q2roijgou.png"></a>
+    <a href="/hopto/home/17074" rel=sponsored><img src="https://www.nairaland.com/vertipics/iqax0ww60vcft2zqxgm9ocus2dq86ae0.jpg"></a>
+    <a href="/hopto/home/15920" rel=sponsored><img src="https://www.nairaland.com/vertipics/1cqm2xehafkcin1q0te5z27n9tz69oy6.jpg"></a>
+  </div>
+</center>
+
+<div class="card shadow text-center mt-2 mb-2">
+  <div class="card-body">
+    <b>Members Online:</b>
+    <!--select count(*) from users where last_active > now() - 5m-->
+    <p>(<b>{{active_users}} Members</b> and <b>{{y}} Guests</b> online in the <b>last 10 minutes!</b>)
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block domready %}
+<script>
+  var page = 1;
+  var empty_page = false;
+  var block_request = false;
+
+  $(window).scroll(function() {
+    var margin = $(document).height() - $(window).height() - 200;
+    if($(window).scrollTop() > margin && empty_page == false && block_request == false) {
+      block_request = true;
+      page += 1;
+      $.get('?page=' + page, function(data) {
+        if(data == '') {
+          empty_page = true;
+        }
+        else {
+          block_request = false;
+          $('#image-list').append(data);
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}
+
+
+{% block js %} 
+
+{% endblock %}

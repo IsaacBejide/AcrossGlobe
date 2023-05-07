@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load hitcount_tags %}
+{% load thumbnail %}
+
+{% block title %} {{post.title | truncatechars:50}} {% endblock %}
+
+{% block css %}
+      .edit{
+      float: right;
+      }
+{% endblock %}
+
+{% block body %}
+{% load humanize %}
+
+      <div class="container mt-3 mb-1 text-center">
+            <h5>{{post.title}} - {{category.category_title}} - Across Globe</h5>
+            {% comment %} <a href="/blog/{{post.slug}}"><h5>{{post.title}} - {{category.category_title}} - acrossGlobe</h5><a> {% endcomment %}
+            <a href="/blog/{{category.slug}}/{{category.id}}">{{category.category_title}}</a> / <a href="/blog/{{post.slug}}">{{post.title}}</a><a> Comments ({{comments.count|add:replycomment.count }})  ({{ post.viewers.count }} Viewers)</a>
+            {% comment %} <a><p>Views: {% get_hit_count for object%}</p></a> {% endcomment %}
+      </div>
+      
+      <div class="vertipics mt-2 text-center">
+            <a href="/hopto/home/17156" rel=sponsored><img src="https://www.nairaland.com/vertipics/6ez6otwqpwazgmvtld26kw3q2roijgou.png"></a>
+            <a href="/hopto/home/17074" rel=sponsored><img src="https://www.nairaland.com/vertipics/iqax0ww60vcft2zqxgm9ocus2dq86ae0.jpg"></a>
+            <a href="/hopto/home/15920" rel=sponsored><img src="https://www.nairaland.com/vertipics/1cqm2xehafkcin1q0te5z27n9tz69oy6.jpg"></a>
+      </div>
+
+      <div class="container mt-3 mb-1 text-center">
+            {% comment %} <a href="{% url 'MyBlog:add_comment' post.slug %}">(Reply)</a><br> {% endcomment %}
+            <button type="button" hx-get="{% url 'MyBlog:add_comment' post.slug %}" hx-target="#dialog" class="btn btn-primary">Reply</button>
+      </div>
+
+
+      <div class="container mt-3 mb-1">
+            <div class="card">
+                  <div class="card-header">
+                        <h5 class="blog-post-title">
+                              <a href="/blog/{{post.slug}}">{{post.title}}</a>
+                              <small>by</small> 
+                              <span style="font-size: 18px;"><a href="#" hx-get="/user_profile/{{post.author.id}}/" hx-target="#dialog">{{post.author}}</a></span>
+                              <span style="font-size: 12px;">{{post.dateTime}}</span>
+                        </h5> 
+                  </div>
+                  <div class="card-body">
+                        {% comment %}<div class="media">
+                              {% if post.author.profile.image %}
+                                    <img class="mr-3 rounded-circle" src="{{post.author.profile.image.url}}" width="50px" height="50px" alt="image">
+                              {% endif %}
+                        </div>
+                        {% load thumbnail %}
+                        <a href="/media/{{ post.image.url }}">
+                              <image src="/media/{% thumbnail post.image 300x0 quality=100 %}">
+                        </a> 
+                        <image src="/media/{{post.image}}" alt="" height="30%" width="80%">{% endcomment %}
+                  
+
+                        <p>{{post.content|safe}}</p>
+                        
+                        {% if user.id != post.author.id %}
+                              <a href="#" hx-get="{% url 'MyBlog:add_comment' post.slug %}" hx-target="#dialog">(Comment)</a>  
+                        {% endif %}
+                        
+                        {% if user.is_authenticated %}
+                              {% if user.id == post.author.id %}
+                                    {% comment %} <a href="/edit_blog_post/{{post.slug}}/">(Modify)</a>{% endcomment %}  
+                                    <a href="#" hx-get="{% url 'MyBlog:update_post' post.slug %}" hx-target="#dialog">(Modify)</a>
+                              {% endif %}
+                        {% endif %}
+
+                        <!-- Like/Unlike Post-->
+                        |{% with total_likes=post.users_like.count users_like=post.users_like.all %}
+                        <span class="total">{{ total_likes }}</span> like{{ total_likes|pluralize }}
+
+                              {% if user.is_authenticated %}
+                                    <a href="#" data-id="{{ post.id }}" data-action="{% if request.user in users_like %}un{% endif %}like" class="like button">
+                                          {% if request.user not in users_like %}
+                                          Like
+                                          {% else %}
+                                          Unlike
+                                          {% endif %}
+                                    </a>
+                              {% endif %}
+                        {% endwith %}
+                        <!-- end -->
+                        {% comment %} href="/{{post.id}}/share/" {% endcomment %}
+                        | <a href="#" hx-get="{% url 'MyBlog:post_share' post.id %}" hx-target="#dialog">Email</a>
+                        {% comment %} | <a id="hidden" href="https://facebook.com/share?url=https://www.acrossglobe.com{{ request.get_full_path|urlencode }}" class="facebook-link" target="_blank"><i class="bi bi-facebook"></i> Facebook</a> {% endcomment %}
+                        | <a id="hidden" href="https://www.twitter.com/share?url=https://www.acrossglobe.com{{ request.get_full_path|urlencode }}" class="twitter-link" target="_blank"><i class="bi bi-twitter"></i> Twitter</a>
+                        {% comment %} | <a id="hidden" href="https://www.instagram.com/share?url=https://www.acrossglobe.com{{ request.get_full_path|urlencode }}" class="instagram-link" target="_blank"><i class="bi bi-instagram"></i> Instagram</a> {% endcomment %}
+                        | <a id="hidden" href="https://api.whatsapp.com/send?+254799043853=+*YOURNUMBER*&text=%20https://www.acrossglobe.com{{ request.get_full_path|urlencode }}&title=<your title>&summary=<your desc>&source=https://www.acrossglobe.com*" class="youtube-link" target="_blank"><i class="bi bi-whatsapp"></i> Whatsapp</a>
+
+                        <br><br>
+                        {%for f in files %}
+                              <img src="{% thumbnail f.file 1000x800 %}">
+                              <!--<img src="/media/{{f.file}}" class="card-img-top mb-2" /><br><br>
+                              <img src="/media/{{f.file}}" class="card-img-top mb-2" /><br><br>
+                              <image src="/media/{{f.file}}" alt=""><br><br> -->
+                        {%endfor%}
+                  </div>   
+            </div>   
+            
+            {% include "blog/blog_details_comments.html" %}
+      </div>
+
+      <div class="vertipics mt-2 mb-2 text-center">
+            <a href="/hopto/home/17156" rel=sponsored><img src="https://www.nairaland.com/vertipics/6ez6otwqpwazgmvtld26kw3q2roijgou.png"></a>
+            <a href="/hopto/home/17074" rel=sponsored><img src="https://www.nairaland.com/vertipics/iqax0ww60vcft2zqxgm9ocus2dq86ae0.jpg"></a>
+            <a href="/hopto/home/15920" rel=sponsored><img src="https://www.nairaland.com/vertipics/1cqm2xehafkcin1q0te5z27n9tz69oy6.jpg"></a>
+      </div>
+
+      <div class="mb-2">
+            {% for title in datas.title.all %}
+                  <a href="#" hx-get="/user_profile/{{post.author.id}}/">{{title}}, </a> 
+            {% endfor %}
+      </div>
+      
+
+      <div class="mb-2">
+            <b>Viewing this topic:</b>
+            {% for viewer in datas.viewers.all %}
+                  <a href="#" hx-get="/user_profile/{{post.author.id}}/" hx-target="#dialog">{{viewer}}, </a> 
+            {% endfor %}
+      </div>
+      
+
+      {% comment %} {% for user in post.viewers %}
+          {{ user.username}}, 
+      {% endfor %} {% endcomment %}
+
+      {% comment %} {% for post in post.seen_by.all %}
+            {{ seen_by }}, 
+      {% endfor %}    {% endcomment %}
+
+            
+      {% comment %} {% for viewer in datas.viewers.all %}
+            {{ viewer }}, 
+      {% endfor %}         {% endcomment %}
+                        
+      
+
+      {% comment %} <img src="/media/{{post.image}}" alt="" height="250px" width="500px"> {% endcomment %}  
+
+
+
+       {% comment %} {% if user.is_authenticated %}
+                  <div class="container">
+                        <h5>Add Comments Here</h5>
+                        <form action="/blog/{{post.slug}}/" method="POST"> {% csrf_token %}
+                              <div class="form-floating">
+                                    <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2"
+                                          style="height: 100px" id="content" name="content">
+                                    </textarea>
+                                    <!--<label for="floatingTextarea2">Leave a comment here.</label>-->
+                                    <br>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                              </div>   
+                        </form>
+                  </div>      
+            {% else %}
+                  <div class="container">
+                        <h4><a href="/login/">Login</a> to post comments below.</h4> 
+                  </div>
+            {% endif %} 
+
+            <br>
+            <div class="alert alert-danger">
+                  <h5><b>Disclaimer</b></h5>
+                  <p>Comments expressed here do not reflect the opinions of acrossGlobe.com. You are <b>solely responsible</b> for <b>anything posted or uploaded</b></p>
+            </div>
+            <h5>All Comments ({{comments.count}})</h5>
+            <br>{% endcomment %}
+
+{% endblock %}
+
+{% block domready %}
+      <script>
+            $('a.like').click(function(e){
+                  e.preventDefault();
+                  $.post('{% url "MyBlog:like" %}',
+                  {
+                        id: $(this).data('id'),
+                        action: $(this).data('action')
+                  },
+                  function(data){
+                        if (data['status'] == 'ok')
+                        {
+                              var previous_action = $('a.like').data('action');
+                  
+                              // toggle data-action
+                              $('a.like').data('action', previous_action == 'like' ? 'unlike' : 'like');
+                              // toggle link text
+                              $('a.like').text(previous_action == 'like' ? 'Unlike' : 'Like');
+                  
+                              // update total likes
+                              var previous_likes = parseInt($('span.count .total').text());
+                              $('span.count .total').text(previous_action == 'like' ? previous_likes + 1 : previous_likes - 1);
+                        }
+                  });
+            });
+      </script>
+{% endblock %}
+
+{% block js %}
+{% endblock %}
