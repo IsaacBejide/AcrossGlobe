@@ -17,7 +17,7 @@ urlpatterns = [
     # path("blog/<int:cat_id>/", views.blogByCategory, name="blogCategory"),
     path(_('add_category/'), views.add_category, name="category"),
     # path("blog/<str:slug>/", views.blogs_comments, name="blogs_comments"),
-    path(_('blog/<str:slug>/'), views.blogs_comment, name="blogs_comment"),
+    path(_('blog/<str:slug>/'), views.blog_details, name="blog_details"),
     #path('<slug:slug>/', PostDetailView.as_view(), name='detail'),
     path(_('blog/<str:slug>/<int:cat_id>/'), views.blogByCategory, name="blogs_Category"),
 
@@ -30,18 +30,16 @@ urlpatterns = [
     #path(_('reply_comment/<str:slug>/<int:comment_id>/'), views.reply_comment, name="reply_comment"),
 
     path(_('edit_blog_post/<str:slug>/'), views.update_post, name="update_post"),
+    path(_('edit_blog_post/<str:slug>/'), UpdatePostView.as_view(), name="edit_blog_post"),
     path(_('delete_blog_post/<str:slug>/'), views.Delete_Blog_Post, name="delete_blog_post"),
     path(_('search/'), views.search, name="search"),
 
 
-    #     profile
-    path(_('profile/<int:myid>/'), views.Profile, name="profile"),
-    path(_('edit_profile/'), views.edit_profile, name="edit_profile"),
-    path(_('user_profile/<int:myid>/'), views.user_profile, name="user_profile"),
+   
 
     #    user authentication
     #path(_('register/'), views.Register, name="register"),
-    path(_('login/'), views.Login, name="login"),
+    #path(_('login/'), views.Login, name="login"),
     path(_('logout/'), views.Logout, name="logout"),
 
     #   Share post via email
@@ -61,8 +59,8 @@ urlpatterns = [
     ###########  Administrative Areas ##################################
     # path(_('admins/'), views.blogsAdmin, name="blogsAdmin"),
     # path(_('admins/<int:cat_id>/'), views.blogsAdminByCategory, name="blogsAdmin"),
-    path(_('admins/blog/<str:slug>/'), views.blogs_comment, name="blogs_comments"),
-    path(_('admins/<int:cat_id>/blog/<str:slug>/'), views.blogs_commentsbyCategory, name="blogs_comments"),
+    #path(_('admins/blog/<str:slug>/'), views.blogs_comment, name="blogs_comments"),
+    #path(_('admins/<int:cat_id>/blog/<str:slug>/'), views.blogs_commentsbyCategory, name="blogs_comments"),
     
 ]
 

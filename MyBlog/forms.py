@@ -112,7 +112,7 @@ class AdvertisementForm(forms.ModelForm):
     #     self.helper.add_input(Submit('submit', 'Submit'))
     
     
-    expiration_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'min': datetime.now().date()}))
+    expiration_date = forms.DateField(label='Start Date:', widget=forms.DateInput(attrs={'type': 'date', 'min': datetime.now().date()}))
     #expiration_date = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'], widget=forms.DateTimeInput(attrs={'class': 'form-control datetimepicker-input', 'data-target': '#datetimepicker1'}))
     class Meta:
         model = Advertisement

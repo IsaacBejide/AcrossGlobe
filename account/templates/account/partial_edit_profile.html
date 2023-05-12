@@ -10,15 +10,41 @@
     <div class="modal-header">
         <h5><a href="#">Edit {{ user }} Profile</a></h5>
     </div>
-    <form action="en/edit_profile/" enctype="multipart/form-data" method="POST"> 
+    <form action="/account/edit_profile/" enctype="multipart/form-data" method="POST"> 
         {% csrf_token %}
         <div class="modal-body">
-                {{ form.as_p }}
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Username:</label>
+                </div>
+                <div class="col-md-6">
+                    <p>{{user}}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Full Name:</label>
+                </div>
+                <div class="col-md-6">
+                    <p>{{user.get_full_name}}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Email:</label>
+                </div>
+                <div class="col-md-6">
+                    <p>{{user.email}}</p>
+                </div>
+            </div>
+            <hr>
+            {% crispy form %}
             {% comment %} <button type="submit" class="btn btn-primary">Update</button> {% endcomment %}
         </div>  
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
-            <button type="submit" class="submit-btn btn btn-primary">Update</button>
+            {% comment %} <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a> {% endcomment %}
+            <input type="submit" value="Update" class="btn btn-primary">
+            {% comment %} <button type="submit" class="submit-btn btn btn-primary">Update</button> {% endcomment %}
         </div>
     </form>
 </div>

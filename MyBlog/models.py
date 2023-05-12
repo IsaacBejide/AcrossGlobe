@@ -12,6 +12,7 @@ from hitcount.models import HitCountMixin, HitCount
 from ckeditor_uploader.fields import RichTextUploadingField  # import this
 from django.utils.translation import gettext_lazy as _
 from django.conf.locale.en import formats as en_formats
+from requests import Session
 
 
 # class Profile(models.Model):
@@ -65,6 +66,7 @@ class BlogPost(models.Model):
     #dislikes = models.IntegerField(default=0)
 
     viewers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='viewed_posts', editable=False)
+    #anonymous_viewers = models.ManyToManyField(django_session, related_name='anonymous_viewed_posts', editable=False)
     users_like = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='posts_liked', blank=True)
     hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk', related_query_name='hit_count_generic_relation')
     

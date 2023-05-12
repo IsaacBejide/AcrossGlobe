@@ -6,7 +6,7 @@
 
 {% block body %}
   {% with WIDGET_ERROR_CLASS='is-invalid' %}
-    <form method="post">
+    <form action="{% url 'login' %}" method="post">
       <div class="modal-content">
         <div class="modal-header">
           <h2>Log-in</h2>
@@ -27,7 +27,9 @@
               {% crispy form %}
               {% csrf_token %}
               <input type="hidden" name="next" value="{{ next }}" />
-              <a href="{% url "password_change" %}">Forgot password?</a>
+              {% comment %} <a href="{% url "password_change" %}">Forgot password?</a> {% endcomment %}
+              <a href="#" hx-get="{% url 'password_change' %}" hx-target="#dialog">Forgot password?</a>  
+
             </div>
             <div class="col-sm-4">
               <div class="mb-2">
@@ -43,8 +45,9 @@
           </div>
         </div>   
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
-          <button type="button" class="btn btn-primary">Submit</button>
+          {% comment %} <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+          <button type="button" class="btn btn-primary">Submit</button> {% endcomment %}
+          <input type="submit" value="Submit" class="btn btn-primary">
         </div>
       </div>
     </form>

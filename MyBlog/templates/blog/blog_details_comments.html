@@ -1,40 +1,43 @@
+{% load thumbnail %}
+
 {% for comment in comments %}
     {% comment %} {% if comment.is_parent %} {% endcomment %}
     <div class="card">
         <div class="card-header">
-                <h5 class="blog-post-title">
-                    Re: {{post.title}} <small>by</small> <span style="font-size: 18px;">
-                        <a href="/user_profile/{{comment.user.id}}/">{{comment.user}}</a> </span> 
-                    <span style="font-size: 12px;">{{comment.dateTime}}</span>
-                </h5>    
+            <h5 class="blog-post-title">
+                <a href="/blog/{{post.slug}}">Re: {{post.title}}</a>
+                <small>by</small> <span style="font-size: 18px;">
+                    <a href="/user_profile/{{comment.user.id}}/">{{comment.user}}</a> </span> 
+                <span style="font-size: 12px;">{{comment.dateTime}}</span>
+            </h5>    
         </div>
-        <div class="card-body">
+        <div class="card-body bg-gradient-secondary">
+            <h7 class="card-text">{{comment.content|safe}}</h7>
+            <a href="#" hx-get="{% url 'MyBlog:reply_comment' comment.id %}" hx-target="#dialog">(Reply)</a>
+        </div> 
+        {% for f in commentfiles %}
+            {% if f.comment_id == comment.id %}
+            <img src="{% thumbnail f.file 500x500 %}" class="mb-2">
+            {% comment %} <image src="/media/{{f.file}}" alt="" height="200px" width="500px"><br><br> {% endcomment %}
+            {% endif %}
+        {% endfor %}
+        
+        {% for reply in replycomment %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="blog-post-title">
+                        <a href="/blog/{{post.slug}}">Re: {{post.title}}</a>
+                        <small>by</small> 
+                        <span style="font-size: 18px;">
+                        <a href="#" hx-get="/user_profile/{{reply.replier_name_id}}/" hx-target="#dialog">{{reply.replier_name}}</a> </span> 
+                        <span style="font-size: 12px;">{{reply.replied_date}}</span>
+                    </h5>    
+                </div>
                 <div class="card-body">
-                    <h7 class="card-text">{{comment.content|safe}}</h7>
-                </div> 
-                <a href="{% url 'MyBlog:reply_comment' comment.id %}">(Reply)</a><br> <br>
-                {% for f in commentfiles %}
-                    {% if f.comment_id == comment.id %}
-                            <image src="/media/{{f.file}}" alt="" height="200px" width="500px"><br><br>
-                    {% endif %}
-                {% endfor %}
-                <br>
-                {% for reply in replycomment %}
-                    <div class="card">
-                            <div class="card-header">
-                                <h5 class="blog-post-title">
-                                        Re: {{post.title}} <small>by</small> <span style="font-size: 18px;">
-                                        <a href="#" hx-get="/user_profile/{{reply.replier_name_id}}/" hx-target="#dialog">{{reply.replier_name}}</a> </span> 
-                                        <span style="font-size: 12px;">{{reply.replied_date}}</span>
-                                </h5>    
-                            </div>
-                            <div class="card-body">
-                                <small>{{ reply.comment|safe }}</small><br>
-                            </div>
-                    </div>
-                {% endfor %}
-                <br>
-                {% comment %} <a href="/reply_comment/{{post.slug}}/{{comment.id}}">(Reply)</a> {% endcomment %}
-        </div>
+                    <h7 class="card-text">{{ reply.comment|safe }}</h7>
+                </div>
+            </div>
+        {% endfor %}
+        {% comment %} <a href="/reply_comment/{{post.slug}}/{{comment.id}}">(Reply)</a> {% endcomment %}
     </div>
 {% endfor %}

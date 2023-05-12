@@ -1,18 +1,62 @@
-{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
 
-{% block title %}Log-in{% endblock %}
+{% block css %}
+{% endblock %}
 
 {% block body %}
-  <h1>Log-in</h1>
-  {% if form.errors %}
+{% with WIDGET_ERROR_CLASS='is-invalid' %}
+<form action="{% url 'login' %}" method="post">
+<div class="modal-content">
+  <div class="modal-header">
+    <h2>Log-in</h2>
+  </div>
+  <div class="modal-body">
+    {% if form.errors %}
     <p>
       Your username and password didn't match.
       Please try again.
     </p>
-  {% else %}
-    <p>Please, use the following form to log-in. If you don't have an account <a href="{% url "register" %}">register here</a></p>
-  {% endif %}
-  <div class="login-form">
+    {% else %}
+      <div class="mb-3">
+        Please, use the following form to log-in.  If you don't have an account <a href="#" hx-get="{% url "register" %}" hx-target="#dialog">register here</a>
+      </div>
+    {% endif %}
+    <div class="row col-sm-12">
+      <div class="col-sm-8">
+        {% crispy form %}
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}" />
+        {% comment %} <a href="{% url "password_change" %}">Forgot password?</a> {% endcomment %}
+        <a href="#" hx-get="{% url 'password_reset' %}" hx-target="#dialog">Forgotten your password?</a>  
+
+      </div>
+      <div class="col-sm-4">
+        <div class="mb-2">
+          <a href="{% url "social:begin" "facebook" %}" class="d-inline-flex pl-2 pr-2"> <span style="width: 150px;" class="btn btn-primary btn-sm"> Login with Facebook </span> </a>
+        </div>
+        <div class="mb-2">
+            <a href="{% url "social:begin" "google-oauth2" %}" class="d-inline-flex pl-2 pr-2"> <span style="width: 150px;" class="btn btn-danger btn-sm"> Login with Google </span> </a>
+        </div>
+        <div class="mb-2">
+          <a href="{% url "social:begin" "twitter" %}" class="d-inline-flex pl-2 pr-2"> <span style="width: 150px;" class="btn btn-info btn-sm"> Login with Twitter </span> </a>
+        </div>
+      </div>
+    </div>
+  </div>   
+  <div class="modal-footer">
+    {% comment %} <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+    <button type="button" class="btn btn-primary">Submit</button> {% endcomment %}
+    <input type="submit" value="Submit" class="btn btn-primary">
+  </div>
+</div>
+</form>
+</div>
+
+
+
+
+  {% comment %} <div class="login-form">
     <form action="{% url 'login' %}" method="post">
       {{ form.as_p }}
       {% csrf_token %}
@@ -33,5 +77,6 @@
         <a href="{% url "social:begin" "google-oauth2" %}">Login with Google</a>
       </li>
     </ul>
-  </div>
+  </div> {% endcomment %}
+  {% endwith %}
 {% endblock %}

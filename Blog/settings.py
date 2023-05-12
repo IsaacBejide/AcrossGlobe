@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'actions.apps.ActionsConfig',
-    
+    'verify_email.apps.VerifyEmailConfig',
+    'phone_field',
 ]
 
 MIDDLEWARE = [
@@ -168,14 +169,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'myblog/media')  # to be c
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'myblog/media')  # to be c
 
 
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static')
+# ]
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -188,17 +190,16 @@ EMAIL_USE_TLS = True
 
 LOGIN_REDIRECT_URL = 'https://acrossglobe.com:8000/'
 LOGIN_URL = 'login'
-LOGOUT_URL = 'logout'
+LOGOUT_URL = 'https://acrossglobe.com:8000/'
 
 
 # Social Authentication
 AUTHENTICATION_BACKENDS = [
-    # 'django.contrib.auth.backends.ModelBackend',
-    # 'account.authentication.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+   #'account.authentication.EmailAuthBackend',
     'social_core.backends.facebook.FacebookOAuth2', 
     'social_core.backends.google.GoogleOAuth2', 
     'social_core.backends.twitter.TwitterOAuth',
-    
     #'lazysignup.backends.LazySignupBackend',
 ]
 

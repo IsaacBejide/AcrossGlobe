@@ -1,3 +1,4 @@
+import json
 from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect, HttpResponse
@@ -27,6 +28,7 @@ from django.template.loader import render_to_string
 from datetime import timedelta
 from django.template import loader
 from hitcount.views import HitCountDetailView
+from verify_email.email_handler import send_verification_email
 
 
 class AllKeywordsView(ListView):
@@ -39,82 +41,129 @@ def is_ajax(request):
 
 
 def add_category(request):
-    categories = BlogPostCategories.objects.all()
-    if request.method == "POST":
-        form = CategoryForm(data=request.POST, files=request.FILES)
-        if form.is_valid():
-            category = form.save(commit=False)
-            type_id = request.POST.get('type')
-            category.type_id = type_id
-            category.save()
-            obj = form.instance
-            alert = True
-            return render(request, "blog/add_categories.html", {'obj': obj, 'alert': alert})
-    else:
-        form = CategoryForm()
+    try:
+        categories = BlogPostCategories.objects.all()
+        if request.method == "POST":
+            form = CategoryForm(data=request.POST, files=request.FILES)
+            if form.is_valid():
+                category = form.save(commit=False)
+                type_id = request.POST.get('type')
+                category.type_id = type_id
+                category.save()
+                obj = form.instance
+                alert = True
+                return render(request, "blog/add_categories.html", {'obj': obj, 'alert': alert})
+        else:
+            form = CategoryForm()
+    except:
+        pass
     return render(request, "blog/add_categories.html", {'form': form, 'categories': categories})
 
-
-# @login_required(login_url = '/login')
-# class add_newtopic(BSModalCreateView):
-#     template_name = 'blog/add_newtopic.html'
-#     form_class = BlogPostForm
-#     success_message = 'Success: new topic was created.'
-#     success_url = reverse_lazy('/')
-
+##################### Add New Post(new topic) and Update to the blog post ####################################-->
 
 @login_required(login_url='/account/login')
 def add_newtopic(request, cat_id):
-    category = BlogPostCategories.objects.get(id=cat_id)
-    
-    #category = BlogPostCategories.objects.filter(slug=slug).first()
-    object_list = BlogPost.objects.all()
-    posts = BlogPost.objects.filter(category=cat_id).order_by('-dateTime')
-    # if request.method=="GET":
-    data = dict()
-    if request.method == "POST":
-        form = BlogPostForm(data=request.POST, files=request.FILES)
-        formset = FileUploadForm(data=request.POST, files=request.FILES)
-        if all([form.is_valid(), formset.is_valid()]):
-            # if form.is_valid():
-            blogpost = form.save(commit=False)
-            blogpost.author = request.user
-            blogpost.category = category  # BlogPostCategories.objects.get(id=cat_id)
-            blogpost.save()
-            files = Upload_Files(request, blogpost.id)
-            Update_newtopic(blogpost, files)
-            obj = form.instance
-            alert = True
-            return render(request, "blog/blog_category.html", {'posts': posts, 'category': category})
-            #return render(request, "blog/blog_category.html", {'obj': obj, 'alert': alert})
-            # return render(request, "blog/" + category.category_title + "/" + str(category.id), {'obj': obj, 'alert': alert})
-    else:
-        form = BlogPostForm()
-        formset = FileUploadForm()
+    try:
+        category = BlogPostCategories.objects.get(id=cat_id)
+        #category = BlogPostCategories.objects.filter(slug=slug).first()
+        object_list = BlogPost.objects.all()
+        posts = BlogPost.objects.filter(category=cat_id).order_by('-dateTime')
+        # if request.method=="GET":
+        data = dict()
+        if request.method == "POST":
+            form = BlogPostForm(data=request.POST, files=request.FILES)
+            formset = FileUploadForm(data=request.POST, files=request.FILES)
+            if all([form.is_valid(), formset.is_valid()]):
+                # if form.is_valid():
+                blogpost = form.save(commit=False)
+                blogpost.author = request.user
+                blogpost.category = category  # BlogPostCategories.objects.get(id=cat_id)
+                blogpost.save()
+                files = Upload_Files(request, blogpost.id)
+                add_image_newtopic(blogpost, files)
+                obj = form.instance
+                alert = True
+                # When the submit button is pressed, the popup should disappear and refresh the main 
+                return render(request, "blog/blog_category.html", {'posts': posts, 'category': category})
+                #return render(request, "blog/blog_category.html", {'obj': obj, 'alert': alert})
+                # return render(request, "blog/" + category.category_title + "/" + str(category.id), {'obj': obj, 'alert': alert})
+        else:
+            form = BlogPostForm()
+            formset = FileUploadForm()
+    except:
+        pass
     return render(request, "blog/partial_add_newtopic.html", {'form': form, 'formset': formset, 'category': category})
 
 
 def Upload_Files(request, post_id):
-    form = FileUploadForm(data=request.POST, files=request.FILES)
-    files = request.FILES.getlist('file')
-    if request.method == 'POST':
-        if form.is_valid():
-            for f in files:
-                file_instance = FileUploads(file=f)
-                file_instance.post_id = post_id
-                file_instance.save()
-    else:
-        form = FileUploadForm()
+    try:
+        form = FileUploadForm(data=request.POST, files=request.FILES)
+        files = request.FILES.getlist('file')
+        if request.method == 'POST':
+            if form.is_valid():
+                for f in files:
+                    file_instance = FileUploads(file=f)
+                    file_instance.post_id = post_id
+                    file_instance.save()
+        else:
+            form = FileUploadForm()
+    except:
+        pass
     return files
 
 
-def Update_newtopic(blogpost, file):
-    if (len(file) > 0):
-        blogpost.image = file[0]  # file[] changed to 0 from 1
-        blogpost.save()
-        return HttpResponse('')
-    else:
-        return HttpResponse('')
+def add_image_newtopic(blogpost, file):
+    try:
+        if (len(file) > 0):
+            blogpost.image = file[0]  # file[] changed to 0 from 1
+            blogpost.save()
+            return HttpResponse('')
+        else:
+            return HttpResponse('')
+    except:
+        pass
+    
+    
+def update_post(request, slug):
+    try:
+        post = BlogPost.objects.get(slug=slug)
+        #request.FILES.getlist('file')
+        
+        # postfiles = FileUploads.objects.none()
+        # if (FileUploads.objects.filter(post_id = post.id).exists() == True):
+        #     postfiles = FileUploads.objects.get(post_id = post.id)
+        #postfiles = []
+        #postfiles.append(get_object_or_404(FileUploads, post_id = post.id))
+            
+        category = BlogPostCategories.objects.get(id=post.category_id)
+        if request.method == "POST":
+            form = BlogPostForm(data=request.POST, instance=post, files=request.FILES)
+            formset = FileUploadForm(data=request.POST, files=request.FILES)
+            if all([form.is_valid(), formset.is_valid()]):
+                post = form.save()
+                files = Upload_Files(request, post.id)
+                return JsonResponse({'status': 'ok'})
+                #return HttpResponse(status=204, headers={'HX-Trigger': json.dumps({"postChanged": None,  "showMessage": f"{post.title} updated." })})
+                #return HttpResponse(status=204, headers={"postChanged": None, "showMessage": f"{post.title} updated."})
+                #return render(request, "blog/partial_edit_blog_post.html", {'post': post, 'category': category})
+        else:
+            form = BlogPostForm(instance=post)
+            #req = request.FILES['file']
+            
+            formset = FileUploadForm(FileUploads.objects.filter(post_id = post.id))
+            # if (postfiles.exists() == False):
+            #     formset = FileUploadForm()
+            # else:
+            #     formset = FileUploadForm(instance=postfiles)
+            #formset = FileUploadForm()
+    except:
+        pass
+    return render(request, "blog/partial_edit_blog_post.html", {'form': form, 'formset': formset, 'category': category})
+
+###################### End Add New Post and Update to the blog post ####################################
+
+
+###################### Update Topic to the blog post ####################################
 
 
 class UpdatePostView(UpdateView):
@@ -127,37 +176,20 @@ class UpdatePostView(UpdateView):
         # 'content': RichTextFormField(config_name='default'), 
     }
     
-def update_post(request, slug):
-    post = BlogPost.objects.get(slug=slug)
-    category = BlogPostCategories.objects.get(id=post.category_id)
-    if request.method == "POST":
-        form = BlogPostForm(data=request.POST, files=request.FILES)
-        formset = FileUploadForm(data=request.POST, files=request.FILES)
-        if all([form.is_valid(), formset.is_valid()]):
-            # if form.is_valid():
-            blogpost = form.save(commit=False)
-            blogpost.author = request.user
-            blogpost.category = category  # BlogPostCategories.objects.get(id=cat_id)
-            blogpost.save()
-            files = Upload_Files(request, blogpost.id)
-            Update_newtopic(blogpost, files)
-            obj = form.instance
-            alert = True
-            return render(request, "blog/partial_edit_blog_post.html", {'post': post, 'category': category})
-            #return render(request, "blog/blog_category.html", {'obj': obj, 'alert': alert})
-            # return render(request, "blog/" + category.category_title + "/" + str(category.id), {'obj': obj, 'alert': alert})
-    else:
-        form = BlogPostForm()
-        formset = FileUploadForm()
-    return render(request, "blog/partial_edit_blog_post.html", {'form': form, 'formset': formset, 'category': category})
-  
-    # template = loader.get_template('blog/edit_blog_post.html')
-    # context = { 'post': post, 'category':category }
-    # return HttpResponse(template.render(context, request))
+###################### End Update Topic to the blog post ####################################
 
 
+###################### List the blog post ####################################
 # @ajax_required
 def blogs_list(request):
+    
+    # Catch an anonymous user as he hits the site.
+    if request.user.is_anonymous:
+        request.session['cached_session_key'] = request.session.session_key
+        
+    active_users = User.objects.all().filter(last_login__gte=now()-timedelta(minutes=10)).count()
+    #active_anonymous = User.objects.all().filter(last_login__gte=now()-timedelta(minutes=5)).count()
+    
     types = TypeCategories.objects.all()
     categories = BlogPostCategories.objects.all().order_by('category_title')
     categories = BlogPostCategories.objects.filter().order_by('category_title')
@@ -165,10 +197,6 @@ def blogs_list(request):
     object_list = BlogPost.objects.all()
     object_list = BlogPost.objects.filter().order_by('-dateTime', 'category')
     paginator = Paginator(object_list, 9)  # 3 posts in each page
-    
-    active_users = User.objects.all().filter(last_login__gte=now()-timedelta(minutes=10)).count()
-    #active_anonymous = User.objects.all().filter(last_login__gte=now()-timedelta(minutes=5)).count()
-    
     page = request.GET.get('page')
     try:
         posts = paginator.page(page)
@@ -179,24 +207,6 @@ def blogs_list(request):
         # If page is out of range deliver last page of results
         posts = paginator.page(paginator.num_pages)
     return render(request, "blog/blog_list.html", {'posts': posts, 'types': types, 'categories': categories, 'files': file_list, 'active_users':active_users})
-
-def blogByCategory(request, slug, cat_id):
-    # categories = BlogPostCategories.objects.all()
-    category = BlogPostCategories.objects.filter(slug=slug).first()
-    object_list = BlogPost.objects.all()
-    object_list = BlogPost.objects.filter(category=cat_id).order_by('-dateTime')
-    paginator = Paginator(object_list, 9)  # 3 posts in each page
-    page = request.GET.get('page')
-    try:
-        posts = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer deliver the first page
-        posts = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range deliver last page of results
-        posts = paginator.page(paginator.num_pages)
-    return render(request, "blog/blog_category.html", {'posts': posts, 'category': category})
-
 
     # def blogs_list(request):
     #     types = TypeCategories.objects.all()
@@ -227,53 +237,92 @@ def blogByCategory(request, slug, cat_id):
 
     #return render(request, "blog/blog_category.html", {'posts': posts, 'category': category})
 
+###################### End list the blog post ####################################
+
+
+###################### List blog posts by category ####################################
+
+def blogByCategory(request, slug, cat_id):
+    # Catch an anonymous user as he hits the site.
+    if request.user.is_anonymous:
+        request.session['cached_session_key'] = request.session.session_key
+        
+    # categories = BlogPostCategories.objects.all()
+    category = BlogPostCategories.objects.filter(slug=slug).first()
+    object_list = BlogPost.objects.all()
+    object_list = BlogPost.objects.filter(category=cat_id).order_by('-dateTime')
+    paginator = Paginator(object_list, 9)  # 3 posts in each page
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer deliver the first page
+        posts = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range deliver last page of results
+        posts = paginator.page(paginator.num_pages)
+    return render(request, "blog/blog_category.html", {'posts': posts, 'category': category})
+
+###################### End list the blog post by category ####################################
+
+   
+###################### Add Comment to blog post ####################################
 
 @login_required(login_url='/account/login')
 def add_comment(request, slug):
-    post = BlogPost.objects.filter(slug=slug).first()
+    try:
+        post = BlogPost.objects.filter(slug=slug).first()
 
-    category = BlogPostCategories.objects.filter(id=post.category_id).first()
-    comments = Comment.objects.filter(blog=post)
-    files = FileUploads.objects.filter(post_id=post.id)
-    queryset = BlogPost.objects.annotate(num_views=Count('viewers')).order_by('-num_views')
-    datas = get_object_or_404(queryset, slug=slug)
+        category = BlogPostCategories.objects.filter(id=post.category_id).first()
+        comments = Comment.objects.filter(blog=post)
+        files = FileUploads.objects.filter(post_id=post.id)
+        queryset = BlogPost.objects.annotate(num_views=Count('viewers')).order_by('-num_views')
+        datas = get_object_or_404(queryset, slug=slug)
 
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        formset = CommentFileUploadForm(data=request.POST, files=request.FILES)
-        if all([form.is_valid(), formset.is_valid()]):
-            comment = form.save(commit=False)
-            comment.user = request.user
-            comment.blog = post
-            comment.save()
-            Comment_Upload_Files(request, comment.id)
-            comments = Comment.objects.filter(blog=post)
+        if request.method == "POST":
+            form = CommentForm(request.POST)
+            formset = CommentFileUploadForm(data=request.POST, files=request.FILES)
+            if all([form.is_valid(), formset.is_valid()]):
+                comment = form.save(commit=False)
+                comment.user = request.user
+                comment.blog = post
+                comment.save()
+                Comment_Upload_Files(request, comment.id)
+                comments = Comment.objects.filter(blog=post)
 
-            commentfiles = CommentFileUploads.objects.none()
-            for comment in comments:
-                commentfiles = commentfiles | CommentFileUploads.objects.filter(comment_id=comment.id)
+                commentfiles = CommentFileUploads.objects.none()
+                for comment in comments:
+                    commentfiles = commentfiles | CommentFileUploads.objects.filter(comment_id=comment.id)
 
-            commentfiles = CommentFileUploads.objects.filter(comment_id=comment.id)
-            return render(request, "blog/blog_details.html",
-                          {'post': post, 'comments': comments, 'commentfiles': commentfiles, 'datas': datas, 'files': files, 'category': category})
-            # return render(request, 'blog/blog_detailes.html', { 'form': form, 'post':post})
-    else:
-        form = CommentForm()
-        formset = CommentFileUploadForm()
+                commentfiles = CommentFileUploads.objects.filter(comment_id=comment.id)
+                
+                return HttpResponse(status=204, headers={"movieListChanged": None, "showMessage": f"{post.title} updated."})
+                #return render(request, "blog/blog_details.html",
+                #              {'post': post, 'comments': comments, 'commentfiles': commentfiles, 'datas': datas, 'files': files, 'category': category})
+                # return render(request, 'blog/blog_detailes.html', { 'form': form, 'post':post})
+        else:
+            form = CommentForm()
+            formset = CommentFileUploadForm()
+    except:
+        pass
     return render(request, 'blog/partial_add_comment.html', {'form': form, 'formset': formset, 'post': post, 'category': category})
 
 def Comment_Upload_Files(request, comment_id):
-    form = CommentFileUploadForm(data=request.POST, files=request.FILES)
-    files = request.FILES.getlist('file')
-    if request.method == 'POST':
-        if form.is_valid():
-            for f in files:
-                file_instance = CommentFileUploads(file=f)
-                file_instance.comment_id = comment_id
-                file_instance.save()
-    else:
-        form = CommentFileUploadForm()
+    try:
+        form = CommentFileUploadForm(data=request.POST, files=request.FILES)
+        files = request.FILES.getlist('file')
+        if request.method == 'POST':
+            if form.is_valid():
+                for f in files:
+                    file_instance = CommentFileUploads(file=f)
+                    file_instance.comment_id = comment_id
+                    file_instance.save()
+        else:
+            form = CommentFileUploadForm()
+    except:
+        pass
     return files
+
 
 @login_required(login_url='en/account/login')
 def reply_comment(request, comment_id):
@@ -294,96 +343,54 @@ def reply_comment(request, comment_id):
             
             replycomment = ReplyComment.objects.filter(comment_id=comment_id)
             messages.success(request, 'Comment replied!')
-            return render(request, "blog/blog_details.html", {'post': post, 'comments': comment, 'replycomment': replycomment, 'files': files, 'category': category})
+            
+            return HttpResponse(status=204, headers={"movieListChanged": None, "showMessage": f"{post.title} updated."})
+            #return render(request, "blog/blog_details.html", {'post': post, 'comments': comment, 'replycomment': replycomment, 'files': files, 'category': category})
             # return render(request, 'blog/blog_details.html', { 'form': form, 'post':post})
     else:
         form = Reply_CommentForm()
-    return render(request, 'blog/blog_details_comment_reply.html', {'form': form, 'post': post, 'comments': comment, 'category': category})
+    return render(request, 'blog/partial_add_reply_comment.html', {'form': form, 'post': post, 'comments': comment, 'category': category})
  
-  
-# class PostListView(ListView):
-#     model = BlogPost
-#     context_object_name = 'posts'
-#     template_name = 'post_list.html'
+###################### End add comment to blog post ####################################
 
 
-# class PostDetailView(HitCountDetailView):
-#     model = BlogPost
-#     template_name = 'blog/blog_details.html'
-#     context_object_name = 'post'
-#     slug_field = 'slug'
-#     # set to True to count the hit
-#     count_hit = True
-    
-   
-#     def get_context_data(self, **kwargs):
-#         post = BlogPost.objects.filter(slug=self.slug_field).first()
-#         comments = Comment.objects.filter(blog=post)
-        
-#         category = BlogPostCategories.objects.filter(id=post.category_id).first()
-#         files = FileUploads.objects.filter(post_id=post.id)
-    
-#         replycomment = ReplyComment.objects.none()
-#         for comment in comments:
-#             replycomment = replycomment | ReplyComment.objects.filter(comment_id=comment.id)
-
-#         commentfiles = CommentFileUploads.objects.none()
-#         for comment in comments:
-#             commentfiles = commentfiles | CommentFileUploads.objects.filter(comment_id=comment.id)  # Queryset union using | operator in Django
-        
-#         queryset = BlogPost.objects.annotate(num_views=Count('viewers')).order_by('-num_views')
-#         #posts = BlogPost.objects.annotate(total_views=Count('viewers')).filter(date_added__gte=d, total_views__gt=0).order_by('-total_views')
-#         datas = get_object_or_404(queryset, slug='slug')
-        
-#         context = super(PostDetailView, self).get_context_data(**kwargs)
-#         context.update({'popular_posts': BlogPost.objects.order_by('-hit_count_generic__hits')[:3], 
-#                         'post': post, 'comments': comments, 'commentfiles': commentfiles,  
-#                         'files': files, 'replycomment': replycomment, 'category': category
-#                         }) #'datas': datas,
-#         return context
-
-
-
-def blogs_comment(request, slug):
+def blog_details(request, slug): 
     post = BlogPost.objects.filter(slug=slug).first()
+    # To know how many authenticated users and anonymous users that viewed the post.
+    post_viewed(request=request, post_id=post.id) 
+    try:
+        category = BlogPostCategories.objects.filter(id=post.category_id).first()
+        files = FileUploads.objects.filter(post_id=post.id)
+        queryset = BlogPost.objects.annotate(num_views=Count('viewers')).order_by('-num_views')
+        datas = get_object_or_404(queryset, slug=slug)
+        comments = Comment.objects.filter(blog=post)
+        
+        replycomment = ReplyComment.objects.none()
+        for comment in comments:
+            replycomment = replycomment | ReplyComment.objects.filter(comment_id=comment.id)    # Queryset union using | operator in Django
 
-    # To know how many authenticated users that viewed the post.
-    post_viewed(request=request, post_id=post.id)
-    #count_hit = True
+        commentfiles = CommentFileUploads.objects.none()
+        for comment in comments:
+            commentfiles = commentfiles | CommentFileUploads.objects.filter(comment_id=comment.id)  # Queryset union using | operator in Django
+    except:
+        pass
+    return render(request, "blog/blog_details.html", {'post': post, 'comments': comments, 'commentfiles': commentfiles, 'datas': datas, 'files': files, 'replycomment': replycomment, 'category': category})
 
-    category = BlogPostCategories.objects.filter(id=post.category_id).first()
-    files = FileUploads.objects.filter(post_id=post.id)
-    # commentfiles = CommentFileUploads.objects.filter(comment.id)
 
-    queryset = BlogPost.objects.annotate(num_views=Count('viewers')).order_by('-num_views')
-    #posts = BlogPost.objects.annotate(total_views=Count('viewers')).filter(date_added__gte=d, total_views__gt=0).order_by('-total_views')
-    datas = get_object_or_404(queryset, slug=slug)
-
-    comments = Comment.objects.filter(blog=post)
-    
-    replycomment = ReplyComment.objects.none()
-    for comment in comments:
-        replycomment = replycomment | ReplyComment.objects.filter(comment_id=comment.id)
-
-    commentfiles = CommentFileUploads.objects.none()
-    for comment in comments:
-        commentfiles = commentfiles | CommentFileUploads.objects.filter(comment_id=comment.id)  # Queryset union using | operator in Django
-
-    if request.method == "POST":
-        form = CommentForm(data=request.POST, files=request.FILES)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.blog_id = post.id
-            comment.save()
-
-            obj = form.instance
-            alert = True
-            return render(request, "blog/blog_details.html", {'obj': obj, 'alert': alert})
-    else:
-        form = CommentForm()
-    return render(request, "blog/blog_details.html",
-                  {'post': post, 'comments': comments, 'commentfiles': commentfiles, 'datas': datas, 'files': files, 'replycomment': replycomment,
-                   'category': category})
+def post_viewed(request, post_id):
+    if post_id:
+        try:
+            post = BlogPost.objects.get(id=post_id)
+         
+            if request.user.is_authenticated:
+                post.viewers.add(request.user)
+            elif request.user.is_anonymous:
+                request.session['cached_session_key'] = request.session.session_key
+                #post.viewers.add()
+            return JsonResponse({'status': 'ok'})
+        except:
+            pass
+    return JsonResponse({'status': 'ko'})
 
 @login_required(login_url='en/account/login')
 def reply_comments(request, comment_id):
@@ -391,9 +398,9 @@ def reply_comments(request, comment_id):
         user = request.user
         content = request.POST.get('content', '')
         blog_id = request.POST.get('blog_id', '')
-        # comment = Comment(user = user, content = content, blog=post)
-        # comment.save()
-    return  # render(request, "blog/blog_details.html", {'post':post, 'comments':comments, 'datas':datas, 'files':files, 'category':category})
+        #comment = Comment(user = user, content = content, blog=post)
+        #comment.save()
+    #return  render(request, "blog/blog_details.html", {'post':post, 'comments':comments, 'datas':datas, 'files':files, 'category':category})
 
 
 # def BlogPostLike(request, pk):
@@ -420,16 +427,16 @@ def reply_comments(request, comment_id):
 #        return redirect('blog/blog_details.html')
 
 
-def blogs_commentsbyCategory(request, slug, cat_id):
-    post = BlogPost.objects.filter(slug=slug, category=cat_id).first()
-    comments = Comment.objects.filter(blog=post)
-    if request.method == "POST":
-        user = request.user
-        content = request.POST.get('content', '')
-        blog_id = request.POST.get('blog_id', '')
-        comment = Comment(user=user, content=content, blog=post)
-        comment.save()
-    return render(request, "blog/blog_details.html", {'post': post, 'comments': comments})
+# def blogs_commentsbyCategory(request, slug, cat_id):
+#     post = BlogPost.objects.filter(slug=slug, category=cat_id).first()
+#     comments = Comment.objects.filter(blog=post)
+#     if request.method == "POST":
+#         user = request.user
+#         content = request.POST.get('content', '')
+#         blog_id = request.POST.get('blog_id', '')
+#         comment = Comment(user=user, content=content, blog=post)
+#         comment.save()
+#     return render(request, "blog/blog_details.html", {'post': post, 'comments': comments})
 
 
 def Delete_Blog_Post(request, slug):
@@ -449,74 +456,50 @@ def search(request):
         return render(request, "blog/search.html", {})
 
 
-def user_profile(request, myid):
-    post = BlogPost.objects.filter(author_id=myid).order_by('-dateTime')
-    return render(request, "blog/partial_user_profile.html", {'post': post})
+# def Register(request):
+#     if request.method == "POST":
+#         username = request.POST['username']
+#         email = request.POST['email']
+#         first_name = request.POST['first_name']
+#         last_name = request.POST['last_name']
+#         password1 = request.POST['password1']
+#         password2 = request.POST['password2']
+
+#         if password1 != password2:
+#             messages.error(request, "Passwords do not match.")
+#             return redirect('blog/register')
+
+#         user = User.objects.create_user(username, email, password1)
+#         user.first_name = first_name
+#         user.last_name = last_name
+#         user.save()
+#         return render(request, 'blog/login.html')
+#     return render(request, "blog/register.html")
 
 
-def Profile(request, myid):
-    post = BlogPost.objects.filter(author_id=myid).order_by('-dateTime')
-    return render(request, "blog/partial_profile.html", {'post': post})
+# def Login(request):
+#     if request.method == "POST":
+#         username = request.POST['username']
+#         password = request.POST['password']
 
+#         user = authenticate(username=username, password=password)
 
-def edit_profile(request):
-    try:
-        profile = request.user.profile
-    except Profile.DoesNotExist:
-        profile = Profile(user=request.user, id=request.user.author_id)
-    if request.method == "POST":
-        form = ProfileForm(data=request.POST, files=request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            alert = True
-            return render(request, "blog/partial_edit_profile.html", {'alert': alert})
-    else:
-        form = ProfileForm(instance=profile)
-    return render(request, "blog/partial_edit_profile.html", {'form': form})
-
-
-def Register(request):
-    if request.method == "POST":
-        username = request.POST['username']
-        email = request.POST['email']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        password1 = request.POST['password1']
-        password2 = request.POST['password2']
-
-        if password1 != password2:
-            messages.error(request, "Passwords do not match.")
-            return redirect('blog/register')
-
-        user = User.objects.create_user(username, email, password1)
-        user.first_name = first_name
-        user.last_name = last_name
-        user.save()
-        return render(request, 'blog/login.html')
-    return render(request, "blog/register.html")
-
-
-def Login(request):
-    if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-
-        user = authenticate(username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            messages.success(request, "Successfully Logged In")
-            return redirect("/")
-        else:
-            messages.error(request, "Invalid Credentials")
-        return render(request, 'blog/login.html')
-    return render(request, "blog/login.html")
+#         if user is not None:
+#             login(request, user)
+#             messages.success(request, "Successfully Logged In")
+#             return redirect("/")
+#         else:
+#             messages.error(request, "Invalid Credentials")
+#         return render(request, 'blog/login.html')
+#     return render(request, "blog/login.html")
 
 
 def Logout(request):
     messages.success(request, "Successfully logged out")
     return redirect('/')
 
+
+###################### Blog post Shared, Like ####################################
 
 def post_share(request, post_id):
     # Retrieve post by id
@@ -562,19 +545,9 @@ def post_like(request):
     return JsonResponse({'status': 'ko'})
 
 
-def post_viewed(request, post_id):
-    if post_id:
-        try:
-            post = BlogPost.objects.get(id=post_id)
-            if request.user.is_authenticated:
-                post.viewers.add(request.user)
-            elif request.user.is_anonymous:
-                #request.session['cached_session_key'] = request.session.session_key
-                post.viewers.add(request.session.session_key)
-            return JsonResponse({'status': 'ok'})
-        except:
-            pass
-    return JsonResponse({'status': 'ko'})
+
+
+###################### End blog post Shared, Like, Viewed ####################################
 
 
 ######################  Follow system ###############################
@@ -592,6 +565,8 @@ def user_detail(request, username):
 
 #####################################################################
 
+
+###################### Advertisement on blog post category ####################################
 @login_required(login_url='/account/login')
 def advertisement(request, category_id):
     category = get_object_or_404(BlogPostCategories, id=category_id)
@@ -604,6 +579,19 @@ def advertisement(request, category_id):
        form = AdvertisementForm()
     return render(request, 'blog/partial_advertisement.html', {'form': form, 'category': category})
 
+def edit_advertisement(request, pk):
+    category = get_object_or_404(BlogPostCategories, id=request.category.id)
+    advert = get_object_or_404(Advertisement, pk=pk)
+    if request.method == "POST":
+        form = AdvertisementForm(request.POST, instance=advert)
+        if form.is_valid():
+            form.save()
+            return redirect('/en/partial_advertisement/{{ category_id }}')
+    else:
+       form = AdvertisementForm(instance=advert)
+    return render(request, 'blog/partial_advertisement.html', {'form': form, 'category': category})
+
+###################### End Advertisement on blog post category ####################################
 
 def site_statistics(request):
     return render(request, 'blog/partial_site_statistics.html')

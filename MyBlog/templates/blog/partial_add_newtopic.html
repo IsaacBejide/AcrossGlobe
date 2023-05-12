@@ -1,7 +1,6 @@
 {% load widget_tweaks %}
 {% load crispy_forms_tags %}
 
-
 {% block css %}
 {% endblock %}
 
@@ -16,7 +15,7 @@
                 <div class="modal-body">
                     {{ form.media }}
                     {% crispy form %}
-                    {% crispy formset %}
+                    {{formset.as_p }}
                 </div>  
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>

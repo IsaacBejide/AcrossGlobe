@@ -6,20 +6,21 @@
 
 {% block body %}
     {% with WIDGET_ERROR_CLASS='is-invalid' %}
-        <form enctype="multipart/form-data" method="POST"> 
+        {% comment %} <form action="{% url 'MyBlog:update_post' post.slug %}" enctype="multipart/form-data" method="POST">{% endcomment %}  
+        <form action= "{{request.path}}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="modal-content">
                 <div class="modal-header">
                     <h5>Update Topic - {{category.category_title}}</h5>
                 </div>
-
                 <div class="modal-body">
+                    {{ form.media }} 
                     {% crispy form %}
-                    {% crispy formset %}
+                    {{formset.as_p }}
                 </div> 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
-                    <button type="submit" class="btn btn-primary">Update Blog</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
                 </div> 
             </div>
         </form>
